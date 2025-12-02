@@ -1,0 +1,32 @@
+
+<mat-toolbar color="primary" class="example-toolbar">
+	<button mat-icon-button (click)="menuClick()"><mat-icon>menu</mat-icon></button>
+	<h1 class="app-task-manager text-danger">Task Manager</h1>
+  <span class="example-spacer"></span>
+  <button class="btn btn-dark button-icon-text" (click)="onLogout()">
+    <mat-icon mat-list-icon>person</mat-icon>
+    <span>Logout</span>
+  </button>
+</mat-toolbar>
+<mat-sidenav-container class="example-container" autosize>
+	<mat-sidenav class="example-sidenav" [ngStyle]='{ width : sizeWidth }' mode="side" opened="true">
+		<mat-nav-list>
+			<mat-list-item class="parent">
+        <mat-icon mat-list-icon>dashboard</mat-icon>
+				<span class="aligned-with-icon" *ngIf="isExpanded || isShowing">Dashboard</span>
+			</mat-list-item>
+		</mat-nav-list>
+    <mat-nav-list>
+</mat-nav-list>
+	</mat-sidenav>
+
+	<div class="example-sidenav-content mt-5 p-5">
+		<router-outlet />
+	</div>
+
+</mat-sidenav-container>
+
+
+  <!-- <div class="mt-5 p-5">
+    <router-outlet />
+  </div> -->
