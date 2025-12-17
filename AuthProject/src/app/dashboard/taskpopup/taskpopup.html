@@ -1,0 +1,35 @@
+<h1 mat-dialog-title>Task</h1>
+<form [formGroup]="form" (ngSubmit)="addTask()">
+    <div mat-dialog-content>
+    <p>
+      <mat-form-field>
+      <mat-label>Task</mat-label>
+      <input placeholder="Task" matInput formControlName="task">
+    </mat-form-field>
+    <p>
+      <mat-form-field>
+      <mat-label>Description</mat-label>
+      <input placeholder="Description" matInput formControlName="description">
+    </mat-form-field>
+    </p>
+    <!-- <p>
+      <mat-form-field>
+      <mat-label>User</mat-label>
+      <input placeholder="User" matInput formControlName="user_id">
+    </mat-form-field>
+    </p> -->
+    <p>
+      <mat-form-field>
+      <mat-label>Status</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="Ongoing">Ongoing</mat-option>
+        <mat-option value="Closed">Closed</mat-option>
+      </mat-select>
+    </mat-form-field>
+    </p>
+  </div>
+    <div mat-dialog-actions>
+        <button matButton="filled" type="submit" mat-raised-button color="warn" [disabled]="(form.valid==true)? false:true">Submit</button>
+        <button matButton="filled" mat-raised-button color="warn" mat-dialog-close>Close</button>
+    </div>
+</form>

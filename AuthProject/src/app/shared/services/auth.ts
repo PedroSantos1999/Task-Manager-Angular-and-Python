@@ -41,4 +41,12 @@ export class Auth {
     var requestByUrl = environment.apiBaseUrl+'/users/'+user_id;
     return this.http.get(requestByUrl);
   }
+
+  createTask(formData:any){
+    return this.http.post(environment.apiBaseUrl+'/tasks', formData);
+  }
+
+  getUsers(){
+    return this.http.get(environment.apiBaseUrl+'/users');
+  }
 }

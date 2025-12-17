@@ -7,12 +7,15 @@ import uuid
 import jwt
 from datetime import datetime, timedelta, timezone
 from functools import wraps
+from flask_jwt_extended import decode_token
 
 app = Flask(__name__)
 # Create Database
 app.config['SECRET_KEY'] = 'GiveASecretKeyHavingAtleast32Characters'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
-app.config['SQLALCHEMY_BINDS'] = {"users": "sqlite:///users.db"}
+# app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{app.root_path}/tasks.db"
+# app.config['SQLALCHEMY_BINDS'] = {"users": f"sqlite:///{app.root_path}/users.db"}
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///tasks.db"
+app.config['SQLALCHEMY_BINDS'] = {"users": f"sqlite:///users.db"}
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -43,6 +46,11 @@ class User(db.Model):
             "fullName": self.fullName
         }
     
+    def user__public_id(self):
+        return {
+            "public_id": self.public_id
+        }
+    
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task = db.Column(db.String(100), unique=True)  
@@ -63,16 +71,19 @@ class Task(db.Model):
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = request.cookies.get('jwt_token')
+        token = None
+
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
 
         if not token:
-            return jsonify({'message': 'Token is missing!'}), 401
+            return jsonify({'message' : 'Token is missing!'}), 401
 
-        try:
+        try: 
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
             current_user = User.query.filter_by(public_id=data['public_id']).first()
         except:
-            return jsonify({'message': 'Token is invalid!'}), 401
+            return jsonify({'message' : 'Token is invalid!'}), 401
 
         return f(current_user, *args, **kwargs)
 
@@ -130,7 +141,8 @@ def login():
 
         successLogin={'status':True, 'msg':'Login Success', 'token':token}
         response=make_response(successLogin)
-        response.set_cookie('x-auth-token', token)
+        #response.set_cookie('x-auth-token', token)
+        response.set_cookie('jwt-token', token)
 
         return response
 
@@ -148,6 +160,7 @@ def get_users():
     return jsonify([user.to_dict() for user in users])
 
 # Route to get a specific user by its ID (GET method)
+# Get Full Name of User from its ID
 @app.route('/api/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     user = User.query.get(user_id)
@@ -270,6 +283,13 @@ def delete_task(task_id):
         return jsonify({"message": "task deleted"})
     else:
         return jsonify({"error": "task not found"}), 404
+    
+@app.route('/api/useronline', methods=['GET'])
+@token_required
+def get_user_online(current_user):
+    token = request.headers['x-access-token']
+    data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+    return jsonify(data['public_id'])
 
 if __name__ == "__main__":
     app.run(debug=True, port=8001)
